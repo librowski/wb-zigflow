@@ -22,6 +22,9 @@ you edit: each `do:` task is a collapsible section, the output is continuously v
 checks + Zigflow's JSON schema), and problems are reported in place — a disconnected switch
 branch, a node that silently wouldn't make it into the YAML, invalid YAML typed into a field, or
 a schema violation pinned to the offending task. Copy/Download emit the full YAML.
+
+Editing has **undo/redo** (toolbar buttons + `Ctrl+Z` / `Ctrl+Y`): history snapshots hook into
+the SDK's `trackFutureChange` decorator, and node drags coalesce into a single history entry.
 Tests: `pnpm test`.
 
 ## What's modeled

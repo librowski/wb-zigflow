@@ -11,5 +11,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    server: {
+      // The SDK (and transitively @xyflow/react) imports CSS at module level;
+      // inline them so vite transforms those imports instead of Node choking.
+      deps: {
+        inline: ['@workflowbuilder/sdk', '@xyflow/react', '@synergycodes/overflow-ui'],
+      },
+    },
   },
 });
