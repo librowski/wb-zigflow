@@ -1,0 +1,162 @@
+.panel {
+  position: absolute;
+  top: 72px;
+  right: 16px;
+  bottom: 16px;
+  width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default, #d4d4d8);
+  background: var(--background-default, #ffffff);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #d4d4d8);
+  background: var(--background-default, #ffffff);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--background-hover, #f4f4f5);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.statusOk {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+}
+
+.statusBad {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.issues {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  max-height: 30%;
+  overflow: auto;
+}
+
+.issueError {
+  color: #b91c1c;
+}
+
+.issueWarning {
+  color: #b45309;
+}
+
+.outline {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #e4e4e7);
+  background: var(--background-subtle, #fafafa);
+  padding: 8px;
+}
+
+.section {
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.sectionBroken {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  list-style-position: inside;
+}
+
+.summary:hover {
+  background: var(--background-hover, #f4f4f5);
+  border-radius: 6px;
+}
+
+.badge {
+  font-weight: 400;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #4338ca;
+}
+
+.badgeError {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.code {
+  margin: 0;
+  padding: 4px 8px 8px 24px;
+  overflow-x: auto;
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.sectionIssue {
+  margin: 0 8px 6px 24px;
+  font-size: 12px;
+  color: #b91c1c;
+}

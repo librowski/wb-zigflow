@@ -2,11 +2,11 @@ import { WorkflowBuilder } from '@workflowbuilder/sdk';
 
 import '@workflowbuilder/sdk/style.css';
 
-import { YamlPanel } from '../components/export/yaml-panel';
 import { ImportPanel } from '../components/import/import-panel';
+import { YamlView } from '../components/yaml-view/yaml-view';
 import { zigflowNodeTypes } from '../data/node-types';
 import { zigflowTemplates } from '../data/templates';
-import { plugin as zigflowExportPlugin } from '../plugin';
+import { plugin as zigflowPlugin } from '../plugin';
 
 export function App() {
   return (
@@ -14,10 +14,10 @@ export function App() {
       name="zigflow-studio"
       nodeTypes={zigflowNodeTypes}
       diagramTemplates={zigflowTemplates}
-      plugins={[zigflowExportPlugin]}
+      plugins={[zigflowPlugin]}
     >
       <WorkflowBuilder.DefaultLayout />
-      <YamlPanel />
+      <YamlView />
       <ImportPanel />
     </WorkflowBuilder.Root>
   );

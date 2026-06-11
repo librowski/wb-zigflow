@@ -1,7 +1,7 @@
 import { registerComponentDecorator } from '@workflowbuilder/sdk';
 
-import { ExportZigflowButton } from './components/export/export-button';
 import { ImportZigflowButton } from './components/import/import-button';
+import { YamlViewButton } from './components/yaml-view/yaml-view-button';
 
 export function plugin(): void {
   registerComponentDecorator('OptionalAppBarTools', {
@@ -10,8 +10,8 @@ export function plugin(): void {
     name: 'ZigflowImport',
   });
   registerComponentDecorator('OptionalAppBarTools', {
-    content: ExportZigflowButton,
+    content: YamlViewButton,
     place: 'after',
-    name: 'ZigflowExport',
+    name: 'ZigflowYamlView',
   });
 }
