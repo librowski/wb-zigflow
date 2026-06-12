@@ -1,10 +1,14 @@
-import { registerComponentDecorator, registerFunctionDecorator } from '@workflowbuilder/sdk';
+import { type OptionalNodeContent, registerComponentDecorator, registerFunctionDecorator } from '@workflowbuilder/sdk';
 
 import { ImportZigflowButton } from './components/import/import-button';
 import { YamlViewButton } from './components/yaml-view/yaml-view-button';
+import { ExecutionNodeMarker } from './features/execution/execution-node-marker';
+import { RunButton } from './features/execution/run-button';
 import { trackFutureChangeDecorator } from './features/undo-redo/track-future-change-decorator';
 import { UndoRedoButtons } from './features/undo-redo/undo-redo-buttons';
 import { UndoRedoProvider } from './features/undo-redo/undo-redo-provider';
+
+type OptionalNodeContentProps = React.ComponentProps<typeof OptionalNodeContent>;
 
 export function plugin(): void {
   registerComponentDecorator('OptionalHooks', {
@@ -27,6 +31,16 @@ export function plugin(): void {
     content: YamlViewButton,
     place: 'after',
     name: 'ZigflowYamlView',
+  });
+
+  registerComponentDecorator('OptionalAppBarTools', {
+    content: RunButton,
+    place: 'after',
+    name: 'ZigflowRun',
+  });
+
+  registerComponentDecorator<OptionalNodeContentProps>('OptionalNodeContent', {
+    content: ExecutionNodeMarker,
   });
 
   registerFunctionDecorator('trackFutureChange', {

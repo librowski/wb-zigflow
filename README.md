@@ -27,6 +27,30 @@ Editing has **undo/redo** (toolbar buttons + `Ctrl+Z` / `Ctrl+Y`): history snaps
 the SDK's `trackFutureChange` decorator, and node drags coalesce into a single history entry.
 Tests: `pnpm test`.
 
+## Execute on Temporal
+
+The **Run** toolbar button executes the diagram for real — through the actual Zigflow runtime
+on a local Temporal. Requirements:
+
+```sh
+# 1. zigflow binary (https://zigflow.dev/docs/getting-started/installation)
+curl -L https://github.com/zigflow/zigflow/releases/latest/download/zigflow_linux_x86_64 \
+  -o ~/.local/bin/zigflow && chmod +x ~/.local/bin/zigflow
+
+# 2. a local Temporal dev server (either)
+temporal server start-dev
+docker run --rm -d -p 7233:7233 -p 8233:8233 temporalio/temporal server start-dev --ip 0.0.0.0
+```
+
+How it works: a dev-only Vite middleware (`vite-plugin-zigflow-exec.ts`) writes the canvas YAML
+to a temp file, spawns `zigflow run` with a `--cloudevents-config` pointing back at itself,
+starts the workflow via `@temporalio/client` with your JSON input, and awaits the result.
+Zigflow's own CloudEvents (`dev.zigflow.task.started/completed/faulted`, `subject` = task name)
+stream to the browser over SSE and drive **live highlighting**: the running task pulses in the
+YAML panel, completed tasks get a ✓, faults a ✕ — and every canvas node shows a matching
+execution marker. `TEMPORAL_ADDRESS` and `ZIGFLOW_BIN` env vars override the defaults
+(`localhost:7233`, `zigflow` on PATH).
+
 ## What's modeled
 
 | Node          | Zigflow task                                              |

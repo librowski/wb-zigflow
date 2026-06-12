@@ -1,0 +1,153 @@
+.panel {
+  position: absolute;
+  left: 340px;
+  bottom: 16px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default, #d4d4d8);
+  background: var(--background-default, #ffffff);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.button {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #d4d4d8);
+  background: var(--background-default, #ffffff);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--background-hover, #f4f4f5);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.runButton {
+  background: #4338ca;
+  border-color: #4338ca;
+  color: #ffffff;
+}
+
+.runButton:hover {
+  background: #3730a3;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.input {
+  resize: vertical;
+  min-height: 60px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #e4e4e7);
+  background: var(--background-subtle, #fafafa);
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+}
+
+.status {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDotRunning {
+  color: #4338ca;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.statusDotCompleted {
+  color: #047857;
+}
+
+.statusDotFailed {
+  color: #b91c1c;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.result {
+  margin: 0;
+  max-height: 160px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+  background: #ecfdf5;
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
+.error {
+  margin: 0;
+  max-height: 120px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.logs {
+  font-size: 11px;
+}
+
+.logs summary {
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.logLines {
+  margin: 4px 0 0;
+  max-height: 140px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 6px;
+  background: #18181b;
+  color: #d4d4d8;
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

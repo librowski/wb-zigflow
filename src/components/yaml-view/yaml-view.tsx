@@ -2,6 +2,8 @@ import { stringify } from 'yaml';
 
 import styles from './yaml-view.module.css';
 
+import { useExecutionStore } from '../../features/execution/use-execution-store';
+import type { TaskExecutionState } from '../../features/execution/use-execution-store';
 import { useLiveYaml } from '../../hooks/use-live-yaml';
 import type { LiveYaml } from '../../hooks/use-live-yaml';
 import { useYamlViewStore } from '../../stores/use-yaml-view-store';
@@ -116,6 +118,7 @@ function Issues({ live }: { live: LiveYaml }) {
 }
 
 function Outline({ live }: { live: LiveYaml }) {
+  const taskStates = useExecutionStore((state) => state.taskStates);
   const workflowDocument = live.workflowDocument as {
     document?: unknown;
     input?: unknown;
@@ -147,6 +150,7 @@ function Outline({ live }: { live: LiveYaml }) {
             badge={taskKind(body)}
             yaml={toYaml(body)}
             issues={issuesByTask.get(index)}
+            executionState={taskStates[name]}
           />
         );
       })}
@@ -154,25 +158,48 @@ function Outline({ live }: { live: LiveYaml }) {
   );
 }
 
+const EXECUTION_GLYPHS: Record<TaskExecutionState, string> = {
+  running: '⟳ running',
+  completed: '✓ done',
+  faulted: '✕ faulted',
+  cancelled: '– cancelled',
+  retried: '⟳ retrying',
+};
+
 function Section({
   name,
   yaml,
   badge,
   issues,
+  executionState,
 }: {
   name: string;
   yaml: string;
   badge?: string;
   issues?: SchemaIssue[];
+  executionState?: TaskExecutionState;
 }) {
   const broken = (issues?.length ?? 0) > 0;
+  const executionClass =
+    executionState === 'running' || executionState === 'retried'
+      ? styles.sectionRunning
+      : executionState === 'completed'
+        ? styles.sectionCompleted
+        : executionState === 'faulted'
+          ? styles.sectionFaulted
+          : '';
 
   return (
-    <details className={`${styles.section} ${broken ? styles.sectionBroken : ''}`}>
+    <details className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${executionClass}`}>
       <summary className={styles.summary}>
         {name}
         {badge ? <span className={`${styles.badge} ${broken ? styles.badgeError : ''}`}>{badge}</span> : null}
         {broken ? <span className={styles.badgeError + ' ' + styles.badge}>✕ schema</span> : null}
+        {executionState ? (
+          <span className={`${styles.badge} ${styles[`execBadge-${executionState}`] ?? ''}`}>
+            {EXECUTION_GLYPHS[executionState]}
+          </span>
+        ) : null}
       </summary>
       {issues?.map((issue) => (
         <p key={`${issue.path}:${issue.message}`} className={styles.sectionIssue}>

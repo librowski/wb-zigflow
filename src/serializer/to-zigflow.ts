@@ -421,6 +421,12 @@ function taskName(node: WorkflowBuilderNode): string {
   return toCamelCase(nodeLabel(node)) || 'task';
 }
 
+// Same derivation the serializer uses, exposed so execution events
+// (CloudEvents `subject` = task name) can be mapped back to canvas nodes.
+export function taskNameForLabel(label: string): string {
+  return toCamelCase(label) || 'task';
+}
+
 function nodeLabel(node: WorkflowBuilderNode): string {
   const properties = node.data.properties as Record<string, unknown>;
 

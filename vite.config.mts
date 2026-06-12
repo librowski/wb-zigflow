@@ -2,8 +2,10 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import { zigflowExec } from './vite-plugin-zigflow-exec';
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), zigflowExec()],
   server: {
     host: '127.0.0.1',
     port: 4202,
