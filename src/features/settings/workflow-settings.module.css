@@ -1,0 +1,53 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 460px;
+  max-width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.row .field {
+  flex: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-default, #18181b);
+}
+
+.input,
+.textarea {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #e4e4e7);
+  background: var(--background-subtle, #fafafa);
+  font: inherit;
+  font-size: 13px;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.mono {
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+}
+
+.empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-subtle, #71717a);
+}
