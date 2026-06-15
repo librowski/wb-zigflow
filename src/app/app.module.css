@@ -1,0 +1,26 @@
+.shell {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+/* The SDK's DefaultLayout (top bar + palette + canvas + properties) fills here. */
+.builder {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+}
+
+/* Permanent Zigflow YAML dock — always visible to the right of Properties. */
+.yamlDock {
+  width: 560px;
+  min-width: 560px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border-default, #e4e4e7);
+  background: var(--background-default, #ffffff);
+}

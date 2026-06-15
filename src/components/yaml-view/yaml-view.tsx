@@ -1,30 +1,25 @@
+import hljs from 'highlight.js/lib/core';
+import yamlLang from 'highlight.js/lib/languages/yaml';
 import { stringify } from 'yaml';
 
 import styles from './yaml-view.module.css';
+
+hljs.registerLanguage('yaml', yamlLang);
+
+function highlightYaml(yaml: string): string {
+  return hljs.highlight(yaml, { language: 'yaml' }).value;
+}
 
 import { useExecutionStore } from '../../features/execution/use-execution-store';
 import type { TaskExecutionState } from '../../features/execution/use-execution-store';
 import { useLiveYaml } from '../../hooks/use-live-yaml';
 import type { LiveYaml } from '../../hooks/use-live-yaml';
-import { useYamlViewStore } from '../../stores/use-yaml-view-store';
 import type { SchemaIssue } from '../../validation/validate-schema';
 
-export function YamlView() {
-  const open = useYamlViewStore((state) => state.open);
-
-  if (!open) {
-    return null;
-  }
-
-  return <YamlViewPanel />;
-}
-
-function YamlViewPanel() {
+// Live Zigflow YAML view, rendered inside the left panel's "YAML" tab (no
+// floating overlay — the tab owns visibility, so Properties stays visible too).
+export function YamlPanelContent() {
   const live = useLiveYaml();
-
-  function handleClose() {
-    useYamlViewStore.setState({ open: false });
-  }
 
   function handleCopy() {
     if (live.yaml) {
@@ -48,7 +43,7 @@ function YamlViewPanel() {
   }
 
   return (
-    <aside className={styles.panel}>
+    <div className={styles.content}>
       <div className={styles.header}>
         <h2 className={styles.title}>Zigflow YAML (live)</h2>
         <div className={styles.actions}>
@@ -58,15 +53,12 @@ function YamlViewPanel() {
           <button type="button" className={styles.button} onClick={handleDownload} disabled={!live.yaml}>
             Download
           </button>
-          <button type="button" className={styles.button} onClick={handleClose}>
-            Close
-          </button>
         </div>
       </div>
       <Status live={live} />
       <Issues live={live} />
       {live.workflowDocument ? <Outline live={live} /> : null}
-    </aside>
+    </div>
   );
 }
 
@@ -206,7 +198,7 @@ function Section({
           {issue.path}: {issue.message}
         </p>
       ))}
-      <pre className={styles.code}>{yaml}</pre>
+      <pre className={styles.code} dangerouslySetInnerHTML={{ __html: highlightYaml(yaml) }} />
     </details>
   );
 }

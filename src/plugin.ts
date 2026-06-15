@@ -1,7 +1,6 @@
 import { type OptionalNodeContent, registerComponentDecorator, registerFunctionDecorator } from '@workflowbuilder/sdk';
 
 import { ImportZigflowButton } from './components/import/import-button';
-import { YamlViewButton } from './components/yaml-view/yaml-view-button';
 import { ExecutionNodeMarker } from './features/execution/execution-node-marker';
 import { RunButton } from './features/execution/run-button';
 import { trackFutureChangeDecorator } from './features/undo-redo/track-future-change-decorator';
@@ -25,12 +24,6 @@ export function plugin(): void {
     content: ImportZigflowButton,
     place: 'after',
     name: 'ZigflowImport',
-  });
-
-  registerComponentDecorator('OptionalAppBarTools', {
-    content: YamlViewButton,
-    place: 'after',
-    name: 'ZigflowYamlView',
   });
 
   registerComponentDecorator('OptionalAppBarTools', {

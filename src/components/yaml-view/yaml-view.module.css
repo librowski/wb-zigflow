@@ -1,18 +1,11 @@
-.panel {
-  position: absolute;
-  top: 72px;
-  right: 16px;
-  bottom: 16px;
-  width: 480px;
+/* Fills the left panel's YAML tab. */
+.content {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--border-default, #d4d4d8);
-  background: var(--background-default, #ffffff);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  z-index: 50;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
 }
 
 .header {
@@ -155,6 +148,30 @@
   white-space: pre;
 }
 
+/* Syntax highlighting tokens (highlight.js, yaml grammar). */
+.code :global(.hljs-attr),
+.code :global(.hljs-attribute) {
+  color: #0550ae;
+}
+
+.code :global(.hljs-string) {
+  color: #0a7d33;
+}
+
+.code :global(.hljs-number),
+.code :global(.hljs-literal) {
+  color: #953800;
+}
+
+.code :global(.hljs-bullet) {
+  color: #6e7781;
+}
+
+.code :global(.hljs-comment) {
+  color: #6e7781;
+  font-style: italic;
+}
+
 .sectionIssue {
   margin: 0 8px 6px 24px;
   font-size: 12px;
@@ -162,18 +179,21 @@
 }
 
 .sectionRunning {
-  border-color: #c7d2fe;
-  background: #eef2ff;
+  border-color: #86efac;
+  border-left: 3px solid #16a34a;
+  background: #f0fdf4;
   animation: execPulse 1.2s ease-in-out infinite;
 }
 
 .sectionCompleted {
   border-color: #a7f3d0;
+  border-left: 3px solid #047857;
   background: #f0fdf9;
 }
 
 .sectionFaulted {
   border-color: #fecaca;
+  border-left: 3px solid #b91c1c;
   background: #fef2f2;
 }
 
