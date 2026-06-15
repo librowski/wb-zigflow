@@ -1,22 +1,14 @@
-import hljs from 'highlight.js/lib/core';
-import yamlLang from 'highlight.js/lib/languages/yaml';
+import { useEffect, useRef, useState } from 'react';
+import { useSingleSelectedElement } from '@workflowbuilder/sdk';
 import { stringify } from 'yaml';
 
 import styles from './yaml-view.module.css';
-
-hljs.registerLanguage('yaml', yamlLang);
-
-function highlightYaml(yaml: string): string {
-  return hljs.highlight(yaml, { language: 'yaml' }).value;
-}
-
-import { useEffect, useRef, useState } from 'react';
-import { useSingleSelectedElement } from '@workflowbuilder/sdk';
 
 import { useExecutionStore } from '../../features/execution/use-execution-store';
 import type { TaskExecutionState } from '../../features/execution/use-execution-store';
 import { useLiveYaml } from '../../hooks/use-live-yaml';
 import type { LiveYaml } from '../../hooks/use-live-yaml';
+import { highlightYaml } from '../../lib/highlight-yaml';
 import { taskNameForLabel } from '../../serializer/to-zigflow';
 import { setHoveredTask, useHoverStore } from '../../stores/use-hover-store';
 import type { SchemaIssue } from '../../validation/validate-schema';

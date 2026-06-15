@@ -3,6 +3,8 @@ import { useStore } from '@workflowbuilder/sdk';
 
 import styles from './workflow-settings.module.css';
 
+import { YamlCodeEditor } from '../../components/yaml-code-editor/yaml-code-editor';
+
 // Workflow-level config (the `document:` metadata and the `input:` schema) lives
 // on the trigger node's properties so the SDK persists it, but it isn't really
 // "a node's properties" — so we edit it here, in a modal opened via the SDK's
@@ -103,24 +105,20 @@ export function WorkflowSettings() {
       </label>
       <label className={styles.field}>
         <span className={styles.label}>Input (the `input:` section, YAML)</span>
-        <textarea
-          className={`${styles.textarea} ${styles.mono}`}
+        <YamlCodeEditor
           value={form.inputYaml}
-          onChange={(event) => update('inputYaml', event.target.value)}
+          onChange={(value) => update('inputYaml', value)}
           placeholder={'schema:\n  document:\n    type: object'}
           rows={6}
-          spellCheck={false}
         />
       </label>
       <label className={styles.field}>
         <span className={styles.label}>Document Metadata (YAML)</span>
-        <textarea
-          className={`${styles.textarea} ${styles.mono}`}
+        <YamlCodeEditor
           value={form.metadataYaml}
-          onChange={(event) => update('metadataYaml', event.target.value)}
+          onChange={(value) => update('metadataYaml', value)}
           placeholder={'tags:\n  - signal'}
           rows={3}
-          spellCheck={false}
         />
       </label>
     </div>

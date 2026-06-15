@@ -1,0 +1,68 @@
+.editor {
+  position: relative;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #e4e4e7);
+  background: var(--background-subtle, #fafafa);
+  overflow: hidden;
+}
+
+/* The highlighted layer and the textarea MUST share identical typography and
+   box model so the caret/selection line up with the coloured text. */
+.highlight,
+.textarea {
+  margin: 0;
+  padding: 8px;
+  border: 0;
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+}
+
+.highlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: #18181b;
+}
+
+.textarea {
+  position: relative;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  background: transparent;
+  color: transparent;
+  caret-color: #18181b;
+}
+
+.textarea::placeholder {
+  color: var(--text-subtle, #a1a1aa);
+}
+
+/* highlight.js yaml tokens (mirrors the live YAML panel). */
+.highlight :global(.hljs-attr),
+.highlight :global(.hljs-attribute) {
+  color: #0550ae;
+}
+
+.highlight :global(.hljs-string) {
+  color: #0a7d33;
+}
+
+.highlight :global(.hljs-number),
+.highlight :global(.hljs-literal) {
+  color: #953800;
+}
+
+.highlight :global(.hljs-bullet) {
+  color: #6e7781;
+}
+
+.highlight :global(.hljs-comment) {
+  color: #6e7781;
+  font-style: italic;
+}
