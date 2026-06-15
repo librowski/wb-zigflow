@@ -1,0 +1,62 @@
+# GitHub Repo Pulse — a showcase workflow that actually does something:
+# fetch a repo's live star count from the GitHub API and classify it.
+# Input-driven ({ owner, repo }); jq `//` defaults make Run work out of the box.
+document:
+  dsl: 1.0.0
+  taskQueue: zigflow
+  workflowType: repoPulse
+  version: 0.0.1
+  title: Repo Pulse
+input:
+  schema:
+    document:
+      type: object
+      properties:
+        owner:
+          type: string
+          default: temporalio
+        repo:
+          type: string
+          default: temporal
+do:
+  - fetchRepo:
+      call: http
+      with:
+        method: get
+        endpoint: '${ "https://api.github.com/repos/" + ($input.owner // "temporalio") + "/" + ($input.repo // "temporal") }'
+        headers:
+          User-Agent: wb-zigflow
+          Accept: application/vnd.github+json
+      export:
+        as: '${ { stars: .stargazers_count, name: .full_name } }'
+  - classify:
+      switch:
+        - trending:
+            when: ${ $context.stars >= 1000 }
+            then: markTrending
+        - growing:
+            when: ${ $context.stars >= 100 }
+            then: markGrowing
+        - early:
+            then: markEarly
+  - markTrending:
+      do:
+        - trendingVerdict:
+            set:
+              repo: ${ $context.name }
+              stars: ${ $context.stars }
+              verdict: trending
+  - markGrowing:
+      do:
+        - growingVerdict:
+            set:
+              repo: ${ $context.name }
+              stars: ${ $context.stars }
+              verdict: growing
+  - markEarly:
+      do:
+        - earlyVerdict:
+            set:
+              repo: ${ $context.name }
+              stars: ${ $context.stars }
+              verdict: early
