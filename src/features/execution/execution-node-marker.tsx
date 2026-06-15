@@ -5,7 +5,7 @@ import styles from './execution-node-marker.module.css';
 import './execution-node-highlight.css';
 
 import { taskNameForLabel } from '../../serializer/to-zigflow';
-import { setHoveredTask, useHoverStore } from '../../stores/use-hover-store';
+import { setHoveredTask } from '../../stores/use-hover-store';
 import { useExecutionStore } from './use-execution-store';
 
 type Props = {
@@ -61,10 +61,11 @@ export function ExecutionNodeMarker({ props }: Props) {
   });
 
   const taskState = useExecutionStore((state) => (taskName ? state.taskStates[taskName] : undefined));
-  const hoveredTask = useHoverStore((state) => state.taskName);
   const ref = useRef<HTMLSpanElement>(null);
 
-  // Hover handlers on the node container drive the shared hover store.
+  // Hover handlers on the node container drive the shared hover store (so the
+  // matching YAML section highlights). The node itself keeps the SDK's stock
+  // hover styling — we deliberately don't add a custom node outline.
   useEffect(() => {
     const container = ref.current?.closest('.react-flow__node');
 
@@ -109,20 +110,6 @@ export function ExecutionNodeMarker({ props }: Props) {
 
     return () => container.classList.remove(...EXEC_CLASSES);
   }, [taskState]);
-
-  // Hover highlight synced from the YAML panel (outline, so it doesn't fight the
-  // execution box-shadow ring).
-  useEffect(() => {
-    const container = ref.current?.closest('.react-flow__node');
-
-    if (!container) {
-      return;
-    }
-
-    container.classList.toggle('zf-hover', Boolean(taskName) && hoveredTask === taskName);
-
-    return () => container.classList.remove('zf-hover');
-  }, [hoveredTask, taskName]);
 
   return (
     <>
