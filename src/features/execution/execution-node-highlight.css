@@ -1,0 +1,30 @@
+/* Execution state drawn on the React Flow node container (the marker toggles
+   these classes via closest(), because OptionalNodeContent can't reach the
+   wrapper). box-shadow rings follow the node's border-radius. */
+.react-flow__node.zf-exec-running {
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 2px #16a34a,
+    0 0 0 6px rgba(22, 163, 74, 0.2);
+  animation: zfExecPulse 1.2s ease-in-out infinite;
+}
+
+.react-flow__node.zf-exec-completed {
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px #047857;
+}
+
+.react-flow__node.zf-exec-faulted {
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 2px #b91c1c,
+    0 0 0 6px rgba(185, 28, 28, 0.18);
+}
+
+@keyframes zfExecPulse {
+  50% {
+    box-shadow:
+      0 0 0 2px #16a34a,
+      0 0 0 9px rgba(22, 163, 74, 0.06);
+  }
+}

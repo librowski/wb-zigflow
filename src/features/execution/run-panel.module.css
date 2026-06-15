@@ -1,6 +1,6 @@
 .panel {
   position: absolute;
-  left: 340px;
+  left: 400px;
   bottom: 16px;
   width: 400px;
   display: flex;
@@ -74,6 +74,40 @@
   background: var(--background-subtle, #fafafa);
   font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 12px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.textInput {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #e4e4e7);
+  background: var(--background-subtle, #fafafa);
+  font: inherit;
+  font-size: 12px;
+}
+
+.checkField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .status {
