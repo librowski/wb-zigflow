@@ -10,7 +10,7 @@ function highlightYaml(yaml: string): string {
   return hljs.highlight(yaml, { language: 'yaml' }).value;
 }
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSingleSelectedElement } from '@workflowbuilder/sdk';
 
 import { useExecutionStore } from '../../features/execution/use-execution-store';
@@ -190,6 +190,9 @@ function Section({
 }) {
   const hoveredTask = useHoverStore((state) => state.taskName);
   const ref = useRef<HTMLDetailsElement>(null);
+  // Expanded by default, still collapsible — local state survives the frequent
+  // re-renders the live YAML triggers.
+  const [open, setOpen] = useState(true);
   // Active when a hovered or selected node maps here — its own task, or a nested
   // task it owns (switch/fork branch children that have no section of their own).
   const owns = (candidate: string | null | undefined) => Boolean(candidate) && (ownedNames?.has(candidate as string) ?? false);
@@ -214,6 +217,8 @@ function Section({
   return (
     <details
       ref={ref}
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
       className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${executionClass} ${isActive ? styles.sectionActive : ''}`}
       onMouseEnter={taskName ? () => setHoveredTask(taskName) : undefined}
       onMouseLeave={taskName ? () => setHoveredTask(null) : undefined}
