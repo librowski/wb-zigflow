@@ -458,6 +458,7 @@ class DiagramBuilder {
           id: `branch-${parsedCase.then}`,
           sourceHandle: `source:inner:${parsedCase.then}`,
           label: parsedCase.then,
+          caseName: parsedCase.caseName,
           conditions: parsedCase.conditions,
         })),
         ...dataFlowProps(dataFlow),

@@ -78,6 +78,39 @@ describe('importZigflowYaml', () => {
     expect(model.name).toBe('Authorise Change Request');
   });
 
+  it('preserves divergent switch case names and a named catch-all through a round-trip', () => {
+    const yaml = [
+      'document:',
+      '  dsl: 1.0.0',
+      '  taskQueue: zigflow',
+      '  workflowType: routing',
+      '  version: 0.0.1',
+      '  title: Routing',
+      'do:',
+      '  - router:',
+      '      switch:',
+      '        - electronic:',
+      '            when: ${ $input.type == "electronic" }',
+      '            then: handleElectronic',
+      '        - fallback:',
+      '            then: handleOther',
+      '  - handleElectronic:',
+      '      do:',
+      '        - markElectronic:',
+      '            set:',
+      '              done: true',
+      '  - handleOther:',
+      '      do:',
+      '        - markOther:',
+      '            set:',
+      '              done: true',
+    ].join('\n');
+
+    // Case names (`electronic`, `fallback`) differ from their `then:` targets,
+    // and the catch-all is named `fallback`, not `default` — all must survive.
+    expect(roundTrip(yaml)).toEqual(parse(yaml));
+  });
+
   it('rejects YAML without a document section', () => {
     expect(() => importZigflowYaml('hello: world')).toThrow(/document/);
   });

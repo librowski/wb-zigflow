@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
 import { orderRoutingFlow } from '../data/order-routing-flow';
+import { importZigflowYaml } from './to-diagram';
 import { buildZigflowDocument, serializeToZigflowYaml } from './to-zigflow';
 
 const { nodes, edges } = orderRoutingFlow.value.diagram;
@@ -121,5 +122,59 @@ describe('serializeToZigflowYaml', () => {
 
   it('throws a helpful error when there is no trigger node', () => {
     expect(() => buildZigflowDocument([], [])).toThrow(/no Trigger node/);
+  });
+
+  it('dedupes case keys for unconditional branches instead of emitting a duplicate `default`', () => {
+    const yaml = [
+      'document:',
+      '  dsl: 1.0.0',
+      '  taskQueue: zigflow',
+      '  workflowType: routing',
+      '  version: 0.0.1',
+      '  title: Routing',
+      'do:',
+      '  - router:',
+      '      switch:',
+      '        - first:',
+      '            when: ${ $input.kind == "a" }',
+      '            then: handleA',
+      '        - second:',
+      '            when: ${ $input.kind == "b" }',
+      '            then: handleB',
+      '  - handleA:',
+      '      do:',
+      '        - markA:',
+      '            set: {}',
+      '  - handleB:',
+      '      do:',
+      '        - markB:',
+      '            set: {}',
+    ].join('\n');
+
+    const model = importZigflowYaml(yaml);
+    const switchNode = model.diagram.nodes.find((node) => node.data.type === 'zigflow/switch');
+
+    if (!switchNode) {
+      throw new Error('expected the imported diagram to contain a switch node');
+    }
+
+    // Simulate two UI-authored catch-alls: no conditions and no imported name,
+    // so both would naively serialise to the key `default`.
+    const properties = switchNode.data.properties as {
+      decisionBranches: { conditions: unknown[]; caseName?: string }[];
+    };
+
+    for (const branch of properties.decisionBranches) {
+      branch.conditions = [];
+      branch.caseName = undefined;
+    }
+
+    const { do: tasks } = buildZigflowDocument(model.diagram.nodes, model.diagram.edges) as {
+      do: { router: { switch: Record<string, unknown>[] } }[];
+    };
+    const router = tasks.find((task) => 'router' in task);
+    const caseKeys = (router?.router.switch ?? []).map((entry) => Object.keys(entry)[0]);
+
+    expect(caseKeys).toEqual(['default', 'default2']);
   });
 });

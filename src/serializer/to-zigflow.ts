@@ -12,6 +12,7 @@ type DecisionBranch = {
   id?: string;
   sourceHandle?: string;
   label?: string;
+  caseName?: string;
   conditions?: Condition[];
 };
 
@@ -149,11 +150,17 @@ class DocumentBuilder {
     }
 
     const cases: ZigflowTask[] = [];
+    const usedCaseNames = new Set<string>();
 
     for (const branch of branches) {
       const flowName = this.uniqueFlowName(branch.label || 'branch');
       const hasConditions = (branch.conditions?.length ?? 0) > 0;
-      const caseKey = hasConditions ? flowName : 'default';
+      // A case name is its own identity, separate from the `then:` flow it
+      // routes to — preserve an imported one verbatim. Otherwise fall back to
+      // the flow name (conditional cases) or `default` (the catch-all), deduped
+      // within this switch so two unnamed catch-alls can't both collapse onto a
+      // single `default` key and emit a malformed switch.
+      const caseKey = uniqueName(usedCaseNames, branch.caseName?.trim() || (hasConditions ? flowName : 'default'));
 
       cases.push({
         [caseKey]: {
@@ -322,18 +329,7 @@ class DocumentBuilder {
   }
 
   private uniqueFlowName(label: string): string {
-    const base = toCamelCase(label) || 'flow';
-    let candidate = base;
-    let suffix = 2;
-
-    while (this.usedFlowNames.has(candidate)) {
-      candidate = `${base}${suffix}`;
-      suffix += 1;
-    }
-
-    this.usedFlowNames.add(candidate);
-
-    return candidate;
+    return uniqueName(this.usedFlowNames, toCamelCase(label) || 'flow');
   }
 }
 
@@ -348,6 +344,24 @@ function wrapTaskBody(properties: Record<string, unknown>, body: ZigflowTask): Z
     ...(outputAs ? { output: { as: outputAs } } : {}),
     ...body,
   };
+}
+
+// Returns `base`, or `base2`, `base3`… when `base` is already taken, reserving
+// the result in `used`. Shared by flow names (document-global) and switch case
+// keys (per-switch).
+function uniqueName(used: Set<string>, base: string): string {
+  const seed = base || 'flow';
+  let candidate = seed;
+  let suffix = 2;
+
+  while (used.has(candidate)) {
+    candidate = `${seed}${suffix}`;
+    suffix += 1;
+  }
+
+  used.add(candidate);
+
+  return candidate;
 }
 
 const COMPARISON_OPERATORS: Record<string, string> = {
