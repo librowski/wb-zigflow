@@ -2,3 +2,7 @@ node_modules/
 dist/
 *.local
 .DS_Store
+
+# internal — outreach strategy & SDK feedback
+docs/plans/
+docs/wb-sdk-feedback.md

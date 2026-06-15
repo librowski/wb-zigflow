@@ -1,9 +1,17 @@
 # wb-zigflow
 
 Design [Zigflow](https://github.com/zigflow/zigflow) workflows visually. A standalone React app
-built on the [`@workflowbuilder/sdk`](https://www.npmjs.com/package/@workflowbuilder/sdk)
+built on [Synergy Codes'](https://www.synergycodes.com/) [`@workflowbuilder/sdk`](https://www.npmjs.com/package/@workflowbuilder/sdk)
 (Apache-2.0) that edits Temporal workflows as diagrams and speaks Zigflow's
 [Serverless Workflow](https://serverlessworkflow.io) YAML in both directions:
+
+<!--
+  Screenshots (add before sharing): drop PNGs in docs/media/ and uncomment the two lines below.
+    editor.png — canvas with a loaded template + the live Zigflow YAML panel open beside it.
+    run.png    — mid-execution: live task highlighting (✓ on completed, pulse on running) on the canvas + YAML.
+  ![Zigflow workflow editor — canvas with the live YAML panel](docs/media/editor.png)
+  ![Live execution on Temporal — task highlighting on canvas + YAML](docs/media/run.png)
+-->
 
 - **Import** any Zigflow workflow file onto the canvas (auto-layout included).
 - **Edit** it visually — nodes, branches, conditions, data flow.
@@ -92,9 +100,10 @@ export → import → export is a fixed point.
 - Switch is terminal: each case routes to a named sub-flow (`then:`), mirroring the upstream
   switch example. Fork is not: branches converge on an explicit **Join** node and the main
   chain continues after it.
-- A Switch branch with no conditions exports as the `default` case.
-- Task names derive from node labels (camelCased); names that are already identifiers
-  round-trip verbatim. Duplicate task names are allowed (the DSL permits them).
+- An unconditional Switch branch is the catch-all `default` case; an imported switch keeps each
+  case's original name, and two unnamed catch-alls de-duplicate to `default` / `default2`.
+- Task names derive from node labels (camelCased); lowerCamelCase task names round-trip verbatim,
+  while other forms are normalised to lowerCamelCase. Duplicate task names are allowed (the DSL permits them).
 
 ## Known limitations
 
