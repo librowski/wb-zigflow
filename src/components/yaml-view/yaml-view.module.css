@@ -197,11 +197,12 @@
   background: #fef2f2;
 }
 
-/* Synced from hovering the matching canvas node. */
-.sectionHovered {
-  outline: 2px solid #6366f1;
+/* Synced from hovering or selecting the matching canvas node — kept subtle so
+   it coexists with the execution-state backgrounds. */
+.sectionActive {
+  outline: 1.5px solid #a5b4fc;
   outline-offset: -1px;
-  background: #eef2ff;
+  border-radius: 6px;
 }
 
 .execBadge-running,

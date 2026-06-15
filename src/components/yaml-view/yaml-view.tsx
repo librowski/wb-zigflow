@@ -11,11 +11,13 @@ function highlightYaml(yaml: string): string {
 }
 
 import { useEffect, useRef } from 'react';
+import { useSingleSelectedElement } from '@workflowbuilder/sdk';
 
 import { useExecutionStore } from '../../features/execution/use-execution-store';
 import type { TaskExecutionState } from '../../features/execution/use-execution-store';
 import { useLiveYaml } from '../../hooks/use-live-yaml';
 import type { LiveYaml } from '../../hooks/use-live-yaml';
+import { taskNameForLabel } from '../../serializer/to-zigflow';
 import { setHoveredTask, useHoverStore } from '../../stores/use-hover-store';
 import type { SchemaIssue } from '../../validation/validate-schema';
 
@@ -113,6 +115,10 @@ function Issues({ live }: { live: LiveYaml }) {
 
 function Outline({ live }: { live: LiveYaml }) {
   const taskStates = useExecutionStore((state) => state.taskStates);
+  const selectedNode = useSingleSelectedElement()?.node ?? null;
+  const selectedProperties = selectedNode?.data.properties as Record<string, unknown> | undefined;
+  const selectedLabel = typeof selectedProperties?.label === 'string' ? selectedProperties.label : '';
+  const selectedTaskName = selectedLabel ? taskNameForLabel(selectedLabel) : '';
   const workflowDocument = live.workflowDocument as {
     document?: unknown;
     input?: unknown;
@@ -143,6 +149,7 @@ function Outline({ live }: { live: LiveYaml }) {
             name={`do[${index}] ${name}`}
             taskName={name}
             ownedNames={new Set([name, ...collectTaskNames(body)])}
+            selectedTaskName={selectedTaskName}
             badge={taskKind(body)}
             yaml={toYaml(body)}
             issues={issuesByTask.get(index)}
@@ -166,6 +173,7 @@ function Section({
   name,
   taskName,
   ownedNames,
+  selectedTaskName,
   yaml,
   badge,
   issues,
@@ -174,6 +182,7 @@ function Section({
   name: string;
   taskName?: string;
   ownedNames?: Set<string>;
+  selectedTaskName?: string;
   yaml: string;
   badge?: string;
   issues?: SchemaIssue[];
@@ -181,15 +190,16 @@ function Section({
 }) {
   const hoveredTask = useHoverStore((state) => state.taskName);
   const ref = useRef<HTMLDetailsElement>(null);
-  // Highlight when a hovered node maps here — its own task, or a nested task it
-  // owns (switch/fork branch children that have no section of their own).
-  const isHovered = hoveredTask !== null && (ownedNames?.has(hoveredTask) ?? false);
+  // Active when a hovered or selected node maps here — its own task, or a nested
+  // task it owns (switch/fork branch children that have no section of their own).
+  const owns = (candidate: string | null | undefined) => Boolean(candidate) && (ownedNames?.has(candidate as string) ?? false);
+  const isActive = owns(hoveredTask) || owns(selectedTaskName);
 
   useEffect(() => {
-    if (isHovered) {
+    if (isActive) {
       ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-  }, [isHovered]);
+  }, [isActive]);
 
   const broken = (issues?.length ?? 0) > 0;
   const executionClass =
@@ -204,7 +214,7 @@ function Section({
   return (
     <details
       ref={ref}
-      className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${executionClass} ${isHovered ? styles.sectionHovered : ''}`}
+      className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${executionClass} ${isActive ? styles.sectionActive : ''}`}
       onMouseEnter={taskName ? () => setHoveredTask(taskName) : undefined}
       onMouseLeave={taskName ? () => setHoveredTask(null) : undefined}
     >
