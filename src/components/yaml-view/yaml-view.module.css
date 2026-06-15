@@ -197,6 +197,13 @@
   background: #fef2f2;
 }
 
+/* Synced from hovering the matching canvas node. */
+.sectionHovered {
+  outline: 2px solid #6366f1;
+  outline-offset: -1px;
+  background: #eef2ff;
+}
+
 .execBadge-running,
 .execBadge-retried {
   background: #eef2ff;

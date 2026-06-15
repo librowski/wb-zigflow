@@ -10,14 +10,16 @@ function highlightYaml(yaml: string): string {
   return hljs.highlight(yaml, { language: 'yaml' }).value;
 }
 
+import { useEffect, useRef } from 'react';
+
 import { useExecutionStore } from '../../features/execution/use-execution-store';
 import type { TaskExecutionState } from '../../features/execution/use-execution-store';
 import { useLiveYaml } from '../../hooks/use-live-yaml';
 import type { LiveYaml } from '../../hooks/use-live-yaml';
+import { setHoveredTask, useHoverStore } from '../../stores/use-hover-store';
 import type { SchemaIssue } from '../../validation/validate-schema';
 
-// Live Zigflow YAML view, rendered inside the left panel's "YAML" tab (no
-// floating overlay — the tab owns visibility, so Properties stays visible too).
+// Live Zigflow YAML view, rendered in the permanent right-side dock.
 export function YamlPanelContent() {
   const live = useLiveYaml();
 
@@ -139,6 +141,8 @@ function Outline({ live }: { live: LiveYaml }) {
           <Section
             key={`${index}-${name}`}
             name={`do[${index}] ${name}`}
+            taskName={name}
+            ownedNames={new Set([name, ...collectTaskNames(body)])}
             badge={taskKind(body)}
             yaml={toYaml(body)}
             issues={issuesByTask.get(index)}
@@ -160,17 +164,33 @@ const EXECUTION_GLYPHS: Record<TaskExecutionState, string> = {
 
 function Section({
   name,
+  taskName,
+  ownedNames,
   yaml,
   badge,
   issues,
   executionState,
 }: {
   name: string;
+  taskName?: string;
+  ownedNames?: Set<string>;
   yaml: string;
   badge?: string;
   issues?: SchemaIssue[];
   executionState?: TaskExecutionState;
 }) {
+  const hoveredTask = useHoverStore((state) => state.taskName);
+  const ref = useRef<HTMLDetailsElement>(null);
+  // Highlight when a hovered node maps here — its own task, or a nested task it
+  // owns (switch/fork branch children that have no section of their own).
+  const isHovered = hoveredTask !== null && (ownedNames?.has(hoveredTask) ?? false);
+
+  useEffect(() => {
+    if (isHovered) {
+      ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [isHovered]);
+
   const broken = (issues?.length ?? 0) > 0;
   const executionClass =
     executionState === 'running' || executionState === 'retried'
@@ -182,7 +202,12 @@ function Section({
           : '';
 
   return (
-    <details className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${executionClass}`}>
+    <details
+      ref={ref}
+      className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${executionClass} ${isHovered ? styles.sectionHovered : ''}`}
+      onMouseEnter={taskName ? () => setHoveredTask(taskName) : undefined}
+      onMouseLeave={taskName ? () => setHoveredTask(null) : undefined}
+    >
       <summary className={styles.summary}>
         {name}
         {badge ? <span className={`${styles.badge} ${broken ? styles.badgeError : ''}`}>{badge}</span> : null}
@@ -201,6 +226,53 @@ function Section({
       <pre className={styles.code} dangerouslySetInnerHTML={{ __html: highlightYaml(yaml) }} />
     </details>
   );
+}
+
+// All task names nested under a top-level task — switch/fork-branch children
+// that don't get their own section. Lets hovering any node highlight the
+// top-level section that contains its task.
+function collectTaskNames(body: unknown): string[] {
+  if (typeof body !== 'object' || body === null) {
+    return [];
+  }
+
+  const record = body as Record<string, unknown>;
+  const names: string[] = [];
+
+  const visit = (tasks: unknown) => {
+    if (!Array.isArray(tasks)) {
+      return;
+    }
+
+    for (const task of tasks) {
+      if (typeof task !== 'object' || task === null) {
+        continue;
+      }
+
+      const [taskName, taskBody] = Object.entries(task)[0] ?? [];
+
+      if (taskName) {
+        names.push(taskName);
+        names.push(...collectTaskNames(taskBody));
+      }
+    }
+  };
+
+  visit(record.do);
+
+  const fork = record.fork as { branches?: unknown } | undefined;
+
+  if (fork && Array.isArray(fork.branches)) {
+    for (const branch of fork.branches) {
+      if (typeof branch === 'object' && branch !== null) {
+        const [, branchBody] = Object.entries(branch)[0] ?? [];
+
+        visit((branchBody as Record<string, unknown> | undefined)?.do);
+      }
+    }
+  }
+
+  return names;
 }
 
 function taskKind(body: unknown): string {

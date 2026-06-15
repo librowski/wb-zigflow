@@ -5,6 +5,7 @@ import styles from './execution-node-marker.module.css';
 import './execution-node-highlight.css';
 
 import { taskNameForLabel } from '../../serializer/to-zigflow';
+import { setHoveredTask, useHoverStore } from '../../stores/use-hover-store';
 import { useExecutionStore } from './use-execution-store';
 
 type Props = {
@@ -23,20 +24,67 @@ const GLYPHS = {
 
 const EXEC_CLASSES = ['zf-exec-running', 'zf-exec-completed', 'zf-exec-faulted'];
 
+function labelOf(node: { data: { properties?: unknown } }): string {
+  const properties = node.data.properties as Record<string, unknown> | undefined;
+
+  return typeof properties?.label === 'string' ? properties.label : '';
+}
+
+// Per-node overlay rendered via the OptionalNodeContent slot: execution marker
+// + container border, the node↔YAML hover sync, and a duplicate-name index
+// badge. (OptionalNodeContent renders inside the node body, so container-level
+// effects reach the React Flow wrapper via closest() — see
+// docs/wb-sdk-feedback.md #3.)
 export function ExecutionNodeMarker({ props }: Props) {
   const nodeId = props?.nodeId ?? '';
   const label = useStore((store) => {
     const node = store.nodes.find((candidate) => candidate.id === nodeId);
-    const properties = node?.data.properties as Record<string, unknown> | undefined;
 
-    return typeof properties?.label === 'string' ? properties.label : '';
+    return node ? labelOf(node) : '';
   });
-  const taskState = useExecutionStore((state) => (label ? state.taskStates[taskNameForLabel(label)] : undefined));
+  const taskName = label ? taskNameForLabel(label) : '';
+
+  // Ordinal among nodes sharing this task name (shown only when duplicated), so
+  // repeated `do:` task names stay distinguishable on the canvas.
+  const dupIndex = useStore((store) => {
+    if (!taskName) {
+      return '';
+    }
+
+    const sameName = store.nodes.filter((node) => {
+      const candidate = labelOf(node);
+
+      return candidate ? taskNameForLabel(candidate) === taskName : false;
+    });
+
+    return sameName.length < 2 ? '' : `#${sameName.findIndex((node) => node.id === nodeId) + 1}`;
+  });
+
+  const taskState = useExecutionStore((state) => (taskName ? state.taskStates[taskName] : undefined));
+  const hoveredTask = useHoverStore((state) => state.taskName);
   const ref = useRef<HTMLSpanElement>(null);
 
-  // OptionalNodeContent renders inside the node body and can't style the node
-  // container, so toggle execution classes on the React Flow wrapper directly.
-  // (See docs/wb-sdk-feedback.md #3 — no SDK hook for per-node container state.)
+  // Hover handlers on the node container drive the shared hover store.
+  useEffect(() => {
+    const container = ref.current?.closest('.react-flow__node');
+
+    if (!container || !taskName) {
+      return;
+    }
+
+    const enter = () => setHoveredTask(taskName);
+    const leave = () => setHoveredTask(null);
+
+    container.addEventListener('mouseenter', enter);
+    container.addEventListener('mouseleave', leave);
+
+    return () => {
+      container.removeEventListener('mouseenter', enter);
+      container.removeEventListener('mouseleave', leave);
+    };
+  }, [taskName]);
+
+  // Execution-state border on the container.
   useEffect(() => {
     const container = ref.current?.closest('.react-flow__node');
 
@@ -62,15 +110,29 @@ export function ExecutionNodeMarker({ props }: Props) {
     return () => container.classList.remove(...EXEC_CLASSES);
   }, [taskState]);
 
-  if (!taskState) {
-    return <span ref={ref} aria-hidden />;
-  }
+  // Hover highlight synced from the YAML panel (outline, so it doesn't fight the
+  // execution box-shadow ring).
+  useEffect(() => {
+    const container = ref.current?.closest('.react-flow__node');
 
-  const visual = taskState === 'retried' ? 'running' : taskState;
+    if (!container) {
+      return;
+    }
+
+    container.classList.toggle('zf-hover', Boolean(taskName) && hoveredTask === taskName);
+
+    return () => container.classList.remove('zf-hover');
+  }, [hoveredTask, taskName]);
 
   return (
-    <span ref={ref} className={`${styles.marker} ${styles[visual]}`}>
-      {GLYPHS[taskState]}
-    </span>
+    <>
+      <span ref={ref} aria-hidden />
+      {taskState ? (
+        <span className={`${styles.marker} ${styles[taskState === 'retried' ? 'running' : taskState]}`}>
+          {GLYPHS[taskState]}
+        </span>
+      ) : null}
+      {dupIndex ? <span className={styles.indexBadge}>{dupIndex}</span> : null}
+    </>
   );
 }

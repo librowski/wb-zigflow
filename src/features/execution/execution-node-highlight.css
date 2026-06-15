@@ -21,6 +21,14 @@
     0 0 0 6px rgba(185, 28, 28, 0.18);
 }
 
+/* Hover sync from the YAML panel — outline (not box-shadow) so it coexists
+   with the execution ring. */
+.react-flow__node.zf-hover {
+  outline: 2px solid #6366f1;
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
 @keyframes zfExecPulse {
   50% {
     box-shadow:

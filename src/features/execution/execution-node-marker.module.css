@@ -37,6 +37,25 @@
   border-color: #fde68a;
 }
 
+.indexBadge {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #3730a3;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  z-index: 10;
+}
+
 @keyframes pulse {
   50% {
     opacity: 0.35;
