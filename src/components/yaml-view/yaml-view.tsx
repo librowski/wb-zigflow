@@ -106,7 +106,6 @@ function Issues({ live }: { live: LiveYaml }) {
 }
 
 function Outline({ live }: { live: LiveYaml }) {
-  const taskStates = useExecutionStore((state) => state.taskStates);
   const selectedNode = useSingleSelectedElement()?.node ?? null;
   const selectedProperties = selectedNode?.data.properties as Record<string, unknown> | undefined;
   const selectedLabel = typeof selectedProperties?.label === 'string' ? selectedProperties.label : '';
@@ -145,7 +144,6 @@ function Outline({ live }: { live: LiveYaml }) {
             badge={taskKind(body)}
             yaml={toYaml(body)}
             issues={issuesByTask.get(index)}
-            executionState={taskStates[name]}
           />
         );
       })}
@@ -161,6 +159,38 @@ const EXECUTION_GLYPHS: Record<TaskExecutionState, string> = {
   retried: '⟳ retrying',
 };
 
+// A top-level section reflects the execution of the task it owns AND any nested
+// switch/fork-branch task — Zigflow emits events for the inner task (e.g.
+// `growingVerdict`), not the branch container (`markGrowing`). Running wins.
+function aggregateExecutionState(
+  taskStates: Record<string, TaskExecutionState>,
+  names: Set<string> | undefined,
+): TaskExecutionState | undefined {
+  if (!names) {
+    return undefined;
+  }
+
+  let result: TaskExecutionState | undefined;
+
+  for (const name of names) {
+    const state = taskStates[name];
+
+    if (state === 'running' || state === 'retried') {
+      return 'running';
+    }
+
+    if (state === 'faulted') {
+      result = 'faulted';
+    } else if (state === 'completed' && result !== 'faulted') {
+      result = 'completed';
+    } else if (state === 'cancelled' && !result) {
+      result = 'cancelled';
+    }
+  }
+
+  return result;
+}
+
 function Section({
   name,
   taskName,
@@ -169,7 +199,6 @@ function Section({
   yaml,
   badge,
   issues,
-  executionState,
 }: {
   name: string;
   taskName?: string;
@@ -178,9 +207,9 @@ function Section({
   yaml: string;
   badge?: string;
   issues?: SchemaIssue[];
-  executionState?: TaskExecutionState;
 }) {
   const hoveredTask = useHoverStore((state) => state.taskName);
+  const execState = useExecutionStore((store) => aggregateExecutionState(store.taskStates, ownedNames));
   const ref = useRef<HTMLDetailsElement>(null);
   // Expanded by default, still collapsible — local state survives the frequent
   // re-renders the live YAML triggers.
@@ -196,22 +225,34 @@ function Section({
     }
   }, [isActive]);
 
+  // Flash the section while its (owned) task is executing — a long, fading
+  // highlight that marks what is running now, rather than a state that sticks
+  // after the run. The minimum duration keeps fast tasks visible.
+  const isExecuting = execState === 'running';
+  const [flash, setFlash] = useState(false);
+  const wasExecuting = useRef(false);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    if (isExecuting && !wasExecuting.current) {
+      setFlash(true);
+      clearTimeout(flashTimer.current);
+      flashTimer.current = setTimeout(() => setFlash(false), 1500);
+    }
+
+    wasExecuting.current = isExecuting;
+  }, [isExecuting]);
+
+  useEffect(() => () => clearTimeout(flashTimer.current), []);
+
   const broken = (issues?.length ?? 0) > 0;
-  const executionClass =
-    executionState === 'running' || executionState === 'retried'
-      ? styles.sectionRunning
-      : executionState === 'completed'
-        ? styles.sectionCompleted
-        : executionState === 'faulted'
-          ? styles.sectionFaulted
-          : '';
 
   return (
     <details
       ref={ref}
       open={open}
       onToggle={(event) => setOpen(event.currentTarget.open)}
-      className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${executionClass} ${isActive ? styles.sectionActive : ''}`}
+      className={`${styles.section} ${broken ? styles.sectionBroken : ''} ${flash ? styles.sectionFlash : ''} ${isActive ? styles.sectionActive : ''}`}
       onMouseEnter={taskName ? () => setHoveredTask(taskName) : undefined}
       onMouseLeave={taskName ? () => setHoveredTask(null) : undefined}
     >
@@ -219,9 +260,9 @@ function Section({
         {name}
         {badge ? <span className={`${styles.badge} ${broken ? styles.badgeError : ''}`}>{badge}</span> : null}
         {broken ? <span className={styles.badgeError + ' ' + styles.badge}>✕ schema</span> : null}
-        {executionState ? (
-          <span className={`${styles.badge} ${styles[`execBadge-${executionState}`] ?? ''}`}>
-            {EXECUTION_GLYPHS[executionState]}
+        {execState ? (
+          <span className={`${styles.badge} ${styles[`execBadge-${execState}`] ?? ''}`}>
+            {EXECUTION_GLYPHS[execState]}
           </span>
         ) : null}
       </summary>

@@ -98,6 +98,18 @@
 .section {
   border-radius: 6px;
   border: 1px solid transparent;
+  transition:
+    background-color 0.7s ease,
+    box-shadow 0.7s ease,
+    border-color 0.7s ease;
+}
+
+/* Transient highlight while the section's task is executing — held briefly then
+   fades (the .section transition does the fade-out when the class is removed). */
+.sectionFlash {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  box-shadow: inset 3px 0 0 #16a34a;
 }
 
 .sectionBroken {
@@ -178,27 +190,7 @@
   color: #b91c1c;
 }
 
-.sectionRunning {
-  border-color: #86efac;
-  border-left: 3px solid #16a34a;
-  background: #f0fdf4;
-  animation: execPulse 1.2s ease-in-out infinite;
-}
-
-.sectionCompleted {
-  border-color: #a7f3d0;
-  border-left: 3px solid #047857;
-  background: #f0fdf9;
-}
-
-.sectionFaulted {
-  border-color: #fecaca;
-  border-left: 3px solid #b91c1c;
-  background: #fef2f2;
-}
-
-/* Synced from hovering or selecting the matching canvas node — kept subtle so
-   it coexists with the execution-state backgrounds. */
+/* Synced from hovering or selecting the matching canvas node. */
 .sectionActive {
   outline: 1.5px solid #a5b4fc;
   outline-offset: -1px;
@@ -228,10 +220,4 @@
   background: #fffbeb;
   border-color: #fde68a;
   color: #b45309;
-}
-
-@keyframes execPulse {
-  50% {
-    opacity: 0.6;
-  }
 }
